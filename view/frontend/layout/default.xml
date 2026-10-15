@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+
+    "Quick Order" among the footer links (Stores > Configuration > Zero > Quick Order > Link in the Footer).
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="footer_links">
+            <block class="Magento\Framework\View\Element\Html\Link\Current" name="zero-quickorder-footer-link"
+                   ifconfig="zero_quick_order/general/footer_link">
+                <arguments>
+                    <argument name="label" xsi:type="string" translate="true">Quick Order</argument>
+                    <argument name="path" xsi:type="string">quickorder</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+    </body>
+</page>

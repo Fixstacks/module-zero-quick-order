@@ -1,0 +1,64 @@
+<?php
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ *
+ * /quickorder: rows of SKU and quantity (each SKU looked up as it is typed,
+ * HTMX), a pasted list, a CSV file; one plain POST puts them all in the cart.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Zero\QuickOrder\ViewModel\QuickOrder $viewModel
+ */
+$viewModel = $block->getData('viewModel');
+$rows = $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+    ->setTemplate('Zero_QuickOrder::rows.phtml')
+    ->setData('viewModel', $viewModel)
+    ->setData('from', 0)
+    ->setData('count', $viewModel->rows())
+    ->toHtml();
+?>
+<form method="post" action="<?= $escaper->escapeUrl($viewModel->addUrl()) ?>" enctype="multipart/form-data"
+      class="zero-quick-order grid gap-10 lg:grid-cols-[1fr_22rem]" data-quick-order>
+    <?= $block->getBlockHtml('formkey') ?>
+    <section aria-labelledby="quick-order-rows-title">
+        <h2 id="quick-order-rows-title" class="text-lg font-semibold mb-1"><?= $escaper->escapeHtml(__('By SKU')) ?></h2>
+        <p class="text-sm text-base-content/70 mb-4">
+            <?= $escaper->escapeHtml(__('Type a SKU and a quantity per row. A configurable product is ordered by its variant\'s SKU.')) ?>
+        </p>
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="w-56"><?= $escaper->escapeHtml(__('SKU')) ?></th>
+                        <th scope="col" class="w-24"><?= $escaper->escapeHtml(__('Qty')) ?></th>
+                        <th scope="col"><?= $escaper->escapeHtml(__('Product')) ?></th>
+                    </tr>
+                </thead>
+                <tbody id="quick-order-rows">
+                    <?= /* @noEscape */ $rows ?>
+                </tbody>
+            </table>
+        </div>
+        <?= /* @noEscape */ $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+            ->setTemplate('Zero_QuickOrder::more.phtml')
+            ->setData('viewModel', $viewModel)
+            ->setData('from', $viewModel->rows())
+            ->toHtml() ?>
+    </section>
+    <div class="flex flex-col gap-6">
+        <section aria-labelledby="quick-order-list-title">
+            <h2 id="quick-order-list-title" class="text-lg font-semibold mb-1"><?= $escaper->escapeHtml(__('Or paste a list')) ?></h2>
+            <label class="sr-only" for="quick-order-list"><?= $escaper->escapeHtml(__('SKUs, one per line')) ?></label>
+            <textarea name="list" id="quick-order-list" rows="6" class="textarea textarea-bordered w-full font-mono text-sm"
+                      placeholder="<?= $escaper->escapeHtmlAttr("24-MB01, 2\n24-UG06 1\n24-WB02") ?>"></textarea>
+            <p class="text-xs text-base-content/60 mt-1"><?= $escaper->escapeHtml(__('One SKU per line, the quantity after a comma or a space; without one, 1.')) ?></p>
+        </section>
+        <section aria-labelledby="quick-order-csv-title">
+            <h2 id="quick-order-csv-title" class="text-lg font-semibold mb-1"><?= $escaper->escapeHtml(__('Or upload a CSV')) ?></h2>
+            <input type="file" name="csv" accept=".csv,text/csv" class="file-input file-input-bordered w-full">
+            <p class="text-xs text-base-content/60 mt-1"><?= $escaper->escapeHtml(__('SKU in the first column, quantity in the second; a header row is fine.')) ?></p>
+        </section>
+        <button type="submit" class="btn btn-primary"><?= $escaper->escapeHtml(__('Add to Cart')) ?></button>
+    </div>
+</form>

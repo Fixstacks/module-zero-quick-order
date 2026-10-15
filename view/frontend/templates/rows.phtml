@@ -1,0 +1,45 @@
+<?php
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ *
+ * `count` empty rows numbered from `from`: on the page, and as the response
+ * of Controller\Rows\Index (then the "more rows" button follows out of band
+ * with the next `from`). Typing a SKU asks Controller\Product\Lookup what it
+ * is, into the row's last cell.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Zero\QuickOrder\ViewModel\QuickOrder $viewModel
+ */
+$viewModel = $block->getData('viewModel');
+$from = (int) $block->getData('from');
+$count = (int) $block->getData('count');
+$lookupUrl = $escaper->escapeUrl($viewModel->lookupUrl());
+$isFragment = $block->getNameInLayout() === 'zero.quickorder.rows';
+?>
+<?php for ($i = $from; $i < $from + $count; $i++) : ?>
+    <tr>
+        <td>
+            <label class="sr-only" for="quick-order-sku-<?= (int) $i ?>"><?= $escaper->escapeHtml(__('SKU, row %1', $i + 1)) ?></label>
+            <input type="text" name="items[<?= (int) $i ?>][sku]" id="quick-order-sku-<?= (int) $i ?>"
+                   class="input input-bordered input-sm w-full font-mono" autocomplete="off" spellcheck="false"
+                   hx-get="<?= /* @noEscape */ $lookupUrl ?>" hx-trigger="change, keyup changed delay:400ms"
+                   hx-target="next .quick-order-product" hx-swap="innerHTML">
+        </td>
+        <td>
+            <label class="sr-only" for="quick-order-qty-<?= (int) $i ?>"><?= $escaper->escapeHtml(__('Quantity, row %1', $i + 1)) ?></label>
+            <input type="number" name="items[<?= (int) $i ?>][qty]" id="quick-order-qty-<?= (int) $i ?>" value="1" min="1" step="any"
+                   class="input input-bordered input-sm w-full">
+        </td>
+        <td class="quick-order-product text-sm text-base-content/70" aria-live="polite"></td>
+    </tr>
+<?php endfor; ?>
+<?php if ($isFragment) : ?>
+    <?= /* @noEscape */ $block->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+        ->setTemplate('Zero_QuickOrder::more.phtml')
+        ->setData('viewModel', $viewModel)
+        ->setData('from', $from + $count)
+        ->setData('oob', true)
+        ->toHtml() ?>
+<?php endif; ?>

@@ -1,0 +1,21 @@
+<?php
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ *
+ * The "more rows" button: asks Controller\Rows\Index for rows from `from`.
+ * Each rows response re-sends it out of band with the next `from`, so no
+ * script has to count rows.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Zero\QuickOrder\ViewModel\QuickOrder $viewModel
+ */
+$viewModel = $block->getData('viewModel');
+$from = (int) $block->getData('from');
+?>
+<button type="button" id="quick-order-more" class="btn btn-ghost btn-sm mt-2"
+        hx-get="<?= $escaper->escapeUrl($viewModel->rowsUrl() . '?from=' . $from) ?>"
+        hx-target="#quick-order-rows" hx-swap="beforeend"<?= $block->getData('oob') ? ' hx-swap-oob="true"' : '' ?>>
+    + <?= $escaper->escapeHtml(__('%1 more rows', $viewModel->batch())) ?>
+</button>

@@ -1,0 +1,29 @@
+<?php
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ *
+ * What a typed SKU is, for the row's last cell (Controller\Product\Lookup):
+ * the product's name and price, a note when it can't be ordered as is,
+ * "not found" for an unknown SKU, nothing for an empty one.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Zero\QuickOrder\ViewModel\QuickOrder $viewModel
+ */
+$viewModel = $block->getData('viewModel');
+$sku = (string) $block->getData('sku');
+if ($sku === '') {
+    return;
+}
+$product = $viewModel->lookup($sku);
+?>
+<?php if (!$product) : ?>
+    <span class="text-error"><?= $escaper->escapeHtml(__('No product with SKU %1.', $sku)) ?></span>
+<?php else : ?>
+    <a href="<?= $escaper->escapeUrl($product['url']) ?>" class="link link-hover"><?= $escaper->escapeHtml($product['name']) ?></a>
+    <span class="whitespace-nowrap">· <?= $escaper->escapeHtml($product['price']) ?></span>
+    <?php if (!$product['salable']) : ?>
+        <span class="block text-warning"><?= $escaper->escapeHtml(__('Out of stock or needs options: open the product to order it.')) ?></span>
+    <?php endif; ?>
+<?php endif; ?>
